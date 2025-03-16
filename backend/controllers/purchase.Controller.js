@@ -75,38 +75,51 @@ export const stripeSessionController = async (req, res) => {
   }
 };
 
-
 //stripe webhook
 
-const stripeInstance= new Stripe(process.env.STRIPE_SECRET_KEY)
-export const stripeWebHook=async(req,res)=>{
-    const sig=req.headers['stripe-signature']
+const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+export const stripeWebHook = async (req, res) => {
+  const sig = req.headers["stripe-signature"];
 
-    let event;
-    try {
-       event=stripeInstance.webhooks.constructEvent(req.body,sig,process.env.STRIPE_WEBHOOK_SECRET_KEY)
+  let event;
+  try {
+    event = stripeInstance.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET_KEY
+    );
 
-       if(event.type==='payment_intent.succeeded'){
-        const paymentIntent=event.data.object
-        const paymentIntentId=paymentIntent.id
+    if (event.type === "payment_intent.succeeded") {
+      const paymentIntent = event.data.object;
+      const paymentIntentId = paymentIntent.id;
 
-        const session=await stripeInstance.checkout.sessions.list({
-            payment_intent:paymentIntentId
-        })
+      const session = await stripeInstance.checkout.sessions.list({
+        payment_intent: paymentIntentId,
+      });
 
-        const {purchaseId}=session.data[0].metadata
+      const { purchaseId } = session.data[0].metadata;
 
-        const purchaseData=await Purchase.findById(purchaseId)
+      const purchaseData = await Purchase.findById(purchaseId);
 
-        const userData=await User.findById(purchaseData.userId)
-       }
+      const userData = await User.findById(purchaseData.userId);
+
+      const courseData = await Course.findById(purchaseData.courseId);
+
+      userData.enrolledCourse.push(courseData._id);
+      await userData.save();
+
+      // pushing enrolled user in course
+
+      courseData.enrolled.push(userData._id);
+      await courseData.save();
+    }
 
     //    event=Stripe.webhooks.constructEvent(req.body,sig,process.env.STRIPE_WEBHOOK_SECRET_KEY)
-    } catch (error) {
-        return res.status(500).send({
-            success: false,
-            message: "Internal Server Error",
-            error: error.message,
-          });
-    }
-}
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
