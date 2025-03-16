@@ -7,25 +7,16 @@ import cors from "cors";
 import userRoutes from "./routes/user.Routes.js";
 //importing ===Category Routes====
 import categoryRoutes from "./routes/category.Routes.js";
-
 // importing ====Course Routes====
 import courseRoutes from "./routes/course.Routes.js";
-
 //importing ====Lesson Routes=====
 import lessonRoutes from "./routes/lesson.Routes.js";
-
 //importing =====Enrolled Routes=======
-
 import enrolledRoutes from "./routes/enrolled.Routes.js";
-
 //importing ========Quiz Routes================
-
 import quizRoutes from "./routes/quiz.Routes.js";
-
 //importing ========Purchase Routes===========
-
 import purchaseRoutes from "./routes/purchase.Routes.js";
-
 // dotenv config
 dotenv.config();
 // initializing app
