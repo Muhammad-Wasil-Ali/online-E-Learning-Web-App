@@ -32,6 +32,9 @@ app.use(
     credentials: true,
   })
 );
+app.get("/", (req, res) => {
+  res.send("Backend is running! 🚀");
+});
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/category", categoryRoutes);
