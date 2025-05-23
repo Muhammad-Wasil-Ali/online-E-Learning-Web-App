@@ -83,7 +83,7 @@ export const stripeWebHook = async (req, res) => {
 
   let event;
   try {
-    event = stripeInstance.webhooks.constructEvent(
+    event = Stripe.webhooks.constructEvent(
       req.body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET_KEY
@@ -114,6 +114,9 @@ export const stripeWebHook = async (req, res) => {
       await courseData.save();
     }
 
+    if(event.type==='payment_intent.failed'){
+      //wait
+    }
     //    event=Stripe.webhooks.constructEvent(req.body,sig,process.env.STRIPE_WEBHOOK_SECRET_KEY)
   } catch (error) {
     return res.status(500).send({

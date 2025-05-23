@@ -20,7 +20,12 @@ const courseSchema = mongoose.Schema(
       ref: "User",
       required: true,
     },
-
+    lessons: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Lesson",
+      },
+    ],
     enrolled: [
       {
         type: mongoose.Schema.Types.ObjectId,

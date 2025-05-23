@@ -2,6 +2,7 @@ import { User } from "../models/user.Model.js";
 import { comparePassword, hashPassword } from "../utils/bcrypt/bcrypt.js";
 import { sendEmail } from "../utils/emailVerification/email.Verify.js";
 import jwt from "jsonwebtoken";
+import cloudinary from "../utils/cloudinary/cloudinary.js";
 //user Register
 
 export const userRegisterController = async (req, res) => {
@@ -18,12 +19,12 @@ export const userRegisterController = async (req, res) => {
         message: "All fileds are required",
       });
     }
-    // if (!file) {
-    //   return res.status(400).send({
-    //     success: false,
-    //     message: "Profile Photo is Required",
-    //   });
-    // }
+    if (!file) {
+      return res.status(400).send({
+        success: false,
+        message: "Profile Photo is Required",
+      });
+    }
     //checking user is already exists or not
     const existUser = await User.findOne({ email });
     if (existUser) {
@@ -36,9 +37,15 @@ export const userRegisterController = async (req, res) => {
     const verificationCode = Math.floor(
       100000 + Math.random() * 100000
     ).toString();
-
+    //cloudinary setup
+    const cloudResponse = await cloudinary.uploader.upload(file.path, {
+      folder: "users/profilePhoto",
+      resource_type: "image",
+    });
     //Creating User
     const hashedPassword = await hashPassword(password);
+    console.log(name, email, password, phone, file, role);
+
     const user = await User.create({
       name,
       email,
@@ -46,7 +53,11 @@ export const userRegisterController = async (req, res) => {
       phone,
       role,
       verificationCode,
+      profile: {
+        profilePhoto: cloudResponse.secure_url,
+      },
     });
+
     const subject = `Hello ${name}`;
     const emailMessage = `Your Email Verification Code is ${verificationCode}`;
     await sendEmail(email, subject, emailMessage);
@@ -60,7 +71,7 @@ export const userRegisterController = async (req, res) => {
     return res.status(500).send({
       success: false,
       message: "Internal Server Error",
-      error,
+      error: error.message,
     });
   }
 };
@@ -76,7 +87,7 @@ export const verifyEmail = async (req, res) => {
         message: "Both fields are required",
       });
     }
-
+    console.log(email, code);
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).send({
@@ -214,6 +225,7 @@ export const userUpdateController = async (req, res) => {
 
 export const userLogoutController = async (req, res) => {
   try {
+    console.log("hello");
     res.clearCookie("token", {
       httpOnly: true,
       sameSite: "strict",

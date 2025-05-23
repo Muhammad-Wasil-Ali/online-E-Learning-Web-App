@@ -10,10 +10,10 @@ import EmailVerification from "./pages/EmailVerification";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import { Toaster } from "sonner";
-import InstructorDashboard from "./pages/InstructorDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import CourseDetails from "./pages/CourseDetails";
 import Courses from "./pages/Courses";
+import InstructorDashboard from "./Dashboards/InstructorDashboard/InstructorDashboard";
 const App = () => {
   return (
     <>

@@ -3,6 +3,7 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { processVideo } from "../utils/videoProcessing/ffmpeg.js";
 import { Lesson } from "../models/lesson.Model.js";
+import { Course } from "../models/course.Model.js";
 export const createLessonController = async (req, res) => {
   try {
     const { title, duration } = req.body;
@@ -19,16 +20,19 @@ export const createLessonController = async (req, res) => {
     console.log(hlsPath.replace(/\\/g, "/"));
     const videoUrl = `http://localhost:8000/${hlsPath.replace(/\\/g, "/")}`;
 
+    const course = await Course.findById(courseId);
     const lesson = await Lesson.create({
       title,
       duration,
       courseId,
       videoUrl,
     });
+
+    course.lessons.push(lesson._id);
+    await course.save();
     res.status(200).send({
       success: true,
       message: "Lesson Created Succssfully",
-      lesson,
     });
   } catch (error) {
     return res.status(500).send({
@@ -45,7 +49,7 @@ export const getLessonByIdController = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const lesson = await Lesson.findById(id);
+    const lesson = await Lesson.findById(id).populate("courseId");
     if (!lesson) {
       return res.status(400).send({
         success: false,
@@ -191,6 +195,5 @@ export const deleteLessonController = async (req, res) => {
     });
   }
 };
-
 
 //

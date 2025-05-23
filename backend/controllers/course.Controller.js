@@ -9,7 +9,8 @@ export const createCourseController = async (req, res) => {
   try {
     //instructor idd
     const { id } = req.user;
-    const { title, description, category, level, price, duration } = req.body;
+    const { title, description, category, level, price, duration, discount } =
+      req.body;
 
     const file = req.file;
 
@@ -26,6 +27,14 @@ export const createCourseController = async (req, res) => {
         message: "Duration must be a valid number greater than 0",
       });
     }
+
+    if (discount && (isNaN(discount) || discount < 0 || discount > 100)) {
+      return res.status(400).send({
+        success: false,
+        message: "Discount must be a number between 0 and 100",
+      });
+    }
+
     if (isNaN(price) || price <= 0) {
       return res.status(400).send({
         success: false,
@@ -69,6 +78,7 @@ export const createCourseController = async (req, res) => {
       price,
       duration,
       thumbnail: cloudResponse.secure_url,
+      discount,
     });
 
     return res.status(200).send({
@@ -97,7 +107,8 @@ export const getSingleCourse = async (req, res) => {
       })
       .populate({
         path: "instructor",
-      });
+      })
+      .populate({ path: "lessons" });
 
     if (!getSingleCourse) {
       return res.status(404).send({
